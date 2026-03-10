@@ -1,0 +1,61 @@
+# Node / JavaScript
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Expo / React Native
+.expo/
+.expo-shared/
+*.expo
+
+# TypeScript
+*.tsbuildinfo
+
+# Build output / generated artifacts
+cache/
+artifacts/
+dist/
+build/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# Solana / Anchor sensitive files
+**/*keypair*.json
+program/target/
+program/test-ledger/
+
+# Rust
+**/target/
+
+# Android / Gradle
+android/.gradle/
+android/**/build/
+android/local.properties
+*.keystore
+*.jks
+
+# iOS / Xcode (if added later)
+ios/Pods/
+ios/build/
+*.xcworkspace
+*.xcuserstate
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Supabase local CLI temp artifacts
+supabase/.temp/
+supabase/.branches/
