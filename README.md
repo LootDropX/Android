@@ -14,6 +14,8 @@
 
 **📲 [Download Deployed APK (EAS Build)](https://github.com/LootDropX/Android/blob/main/android/app/build/outputs/apk/release/app-release.apk)**
 
+**📸 [Demo Video](https://youtu.be/lIjlukk08KQ)**
+
 
 </div>
 
@@ -584,12 +586,12 @@ Row Level Security is enabled on both `drops` and `claims`. Public reads are all
 
 ## License
 
-This project was built for the **Avalanche Mobile Hackathon**. See [LICENSE](LICENSE) for details.
+This project was built for the **Avalanche Build Games 2026**. See [LICENSE](LICENSE) for details.
 
 ---
 
 <div align="center">
 
-Built with ❤️ for the Avalanche Mobile Seeker · [GitHub](https://github.com/UncleTom29/Loot-Drop)
+Built with ❤️  · [GitHub](https://github.com/UncleTom29/Loot-Drop)
 
 </div>
