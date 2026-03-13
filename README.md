@@ -12,9 +12,8 @@
 
 *Go outside. Claim real crypto. Own it forever.*
 
-**📲 [Download Deployed APK (EAS Build)](https://expo.dev/accounts/uncletom29/projects/lootdrop/builds/950664f9-d399-4f18-b4a9-45e6150ab507)**
+**📲 [Download Deployed APK (EAS Build)](https://github.com/LootDropX/Android/blob/main/android/app/build/outputs/apk/release/app-release.apk)**
 
-**📦 [Download app-debug.apk (GitHub Artifact)](https://github.com/LootDropX/Android/raw/main/android/app/build/outputs/apk/debug/app-debug.apk)**
 
 </div>
 
@@ -38,13 +37,12 @@
    - [5. Run the Mobile App](#5-run-the-mobile-app)
 10. [App Screens](#app-screens)
 11. [Developer Mode](#developer-mode)
-12. [Seeding Devnet Drops](#seeding-devnet-drops)
-13. [Hooks Reference](#hooks-reference)
-14. [On-Chain Program](#on-chain-program)
-15. [Supabase Edge Functions](#supabase-edge-functions)
-16. [Scripts](#scripts)
-17. [Contributing](#contributing)
-18. [License](#license)
+12. [Hooks Reference](#hooks-reference)
+13. [On-Chain Program](#on-chain-program)
+14. [Supabase Edge Functions](#supabase-edge-functions)
+15. [Scripts](#scripts)
+16. [Contributing](#contributing)
+17. [License](#license)
 
 ---
 
@@ -52,7 +50,7 @@
 
 LootDrop is a **GPS-gated, on-chain asset distribution protocol** wrapped in a mobile scavenger hunt game. Creators pin digital loot — AVAX, SPL tokens, or NFTs — to real-world coordinates. Players physically walk to those locations, tap **Claim**, sign a transaction in their wallet, and the asset lands on-chain in their wallet.
 
-All asset custody and claim logic lives in a trustless **Solidity contract** on Avalanche. Supabase handles metadata, geospatial proximity queries (via PostGIS), and the leaderboard. The app targets the **Avalanche Mobile Seeker** device and is designed for the [Avalanche dApp Store](https://dappstore.avalanchemobile.com).
+All asset custody and claim logic lives in a trustless **Solidity contract** on Avalanche. Supabase handles metadata, geospatial proximity queries (via PostGIS), and the leaderboard. The app targets Android & IOS users.
 
 Key properties:
 - **Trustless** — the Solidity contract enforces all rules; the client cannot lie about proximity
@@ -203,19 +201,6 @@ Loot-Drop/
 │       ├── format.ts           # AVAX formatting, public key truncation
 │       └── geofence.ts         # Point-in-radius helpers
 │
-├── program/                    # Hardhat workspace (Rust)
-│   ├── Hardhat.toml
-│   ├── Cargo.toml
-│   └── programs/lootdrop/src/
-│       ├── lib.rs              # Program entrypoint + instruction routing
-│       ├── errors.rs           # LootDropError enum
-│       ├── state/
-│       │   ├── drop.rs         # Drop account (389 bytes)
-│       │   └── claim_record.rs # ClaimRecord PDA
-│       └── instructions/
-│           ├── create_drop.rs  # create_drop instruction
-│           ├── claim_drop.rs   # claim_drop instruction
-│           └── expire_drop.rs  # expire_drop instruction
 │
 ├── supabase/
 │   ├── migrations/
@@ -224,8 +209,6 @@ Loot-Drop/
 │       └── nearby-drops/       # Edge Function — PostGIS proximity query
 │           └── index.ts
 │
-├── scripts/
-│   └── seed-devnet-drops.ts    # Seeds 15 demo drops on Devnet + Supabase
 │
 ├── app.config.ts               # Expo config (env var injection)
 ├── babel.config.js
@@ -250,7 +233,6 @@ Loot-Drop/
 | Android SDK | API 33+ | Required for Seeker device / emulator |
 | Map tiles | — | Uses Geoapify tile API |
 
-> **Seeker device**: The app is Android-first. You can use an Android emulator for non-GPS testing; use Developer Mode for GPS override.
 
 ---
 
@@ -264,12 +246,12 @@ cp .env.example .env
 
 | Variable | Description | Required |
 |---|---|---|
-| `EXPO_PUBLIC_AVAXANA_RPC_URL` | Avalanche RPC endpoint (Helius, QuickNode, or `https://api.devnet.avalanche.com`) | ✅ |
+| `EXPO_PUBLIC_AVAXANA_RPC_URL` | Avalanche RPC endpoint (Helius, QuickNode, etc.) | ✅ |
 | `EXPO_PUBLIC_PROGRAM_ID` | Deployed Solidity contract ID (base58) | ✅ |
 | `EXPO_PUBLIC_SUPABASE_URL` | Supabase project URL | ✅ |
 | `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key (safe to expose) | ✅ |
 | `EXPO_PUBLIC_HELIUS_API_KEY` | Helius API key for DAS NFT queries | ✅ |
-| `AVAXANA_CLUSTER` | `devnet` or `mainnet-beta` | ✅ |
+| `AVAXANA_CLUSTER` | `fuji` or `mainnet` | ✅ |
 | `SUPABASE_SERVICE_ROLE_KEY` | **Server-side only** — used in Edge Functions and seed script | ⚠️ Never expose to client |
 
 > All `EXPO_PUBLIC_*` variables are injected into the app bundle at build time via `app.config.ts`. The `SUPABASE_SERVICE_ROLE_KEY` is strictly server-side and must never be committed or bundled.
@@ -349,9 +331,7 @@ anchor deploy
 #   - program/programs/lootdrop/src/lib.rs → declare_id!("<ID>")
 
 cd ..
-```
-
-> If you only want to run the frontend against the pre-seeded demo drops on Devnet, you can skip the Hardhat deployment and use the placeholder program ID from `.env.example`.
+```-seeded demo drops on Devnet, you can skip the Hardhat deployment and use the placeholder program ID from `.env.example`.
 
 ### 5. Run the Mobile App
 
@@ -507,39 +487,6 @@ idle → validating → building_tx → awaiting_signature → confirming → su
 
 ---
 
-## On-Chain Program
-
-Located in `program/programs/lootdrop/`. Built with [Hardhat](https://www.anchor-lang.com).
-
-### Instructions
-
-#### `create_drop`
-
-Creates a `Drop` PDA and a `Vault` PDA. For AVAX drops, transfers the reward amount from the creator into the vault.
-
-```
-Accounts: creator (signer), drop PDA, vault PDA, system_program
-Seeds:    drop  → ["drop", creator, uuid]
-          vault → ["vault", drop_pda]
-```
-
-Parameters: `uuid`, `title` (≤50 chars), `description` (≤200 chars), `latitude` (×1000000), `longitude` (×1000000), `rarity_tier`, `asset_type`, `asset_amount`, `max_claims`, `expires_at`.
-
-#### `claim_drop`
-
-Validates the drop is claimable and the claimer hasn't claimed before, creates a `ClaimRecord` PDA, and transfers the reward from the vault to the claimer.
-
-```
-Accounts: claimer (signer), drop PDA, claim_record PDA, vault PDA, system_program
-Seeds:    claim_record → ["claim_record", drop_pda, claimer]
-```
-
-Parameters: `distance_cm` (client-provided distance in centimetres, stored in the claim record).
-
-#### `expire_drop`
-
-Deactivates the drop and returns remaining escrowed AVAX to the creator. Can only be called by the creator after `expires_at`.
-
 ### Error Codes
 
 | Error | Message |
@@ -554,28 +501,7 @@ Deactivates the drop and returns remaining escrowed AVAX to the creator. Can onl
 | `InvalidAmount` | Asset amount must be greater than zero |
 | `InvalidMaxClaims` | Max claims must be greater than zero |
 
-### Account Space
 
-```
-Drop PDA: 389 bytes
-  8   discriminator
-  32  creator (Pubkey)
-  16  uuid
-  54  title (4-byte prefix + 50 bytes)
- 204  description (4-byte prefix + 200 bytes)
-   8  latitude (i64)
-   8  longitude (i64)
-   1  rarity_tier
-   1  asset_type
-   8  asset_amount
-  33  mint_address (Option<Pubkey>)
-   2  max_claims
-   2  current_claims
-   8  expires_at
-   1  is_active
-   1  vault_bump
-   1  bump
-```
 
 ---
 
@@ -640,7 +566,6 @@ Row Level Security is enabled on both `drops` and `claims`. Public reads are all
 | Lint | `npm run lint` | ESLint over `.ts` and `.tsx` |
 | Type-check | `npm run typecheck` | `tsc --noEmit` |
 | Test | `npm test` | Jest (jest-expo preset) |
-| Seed drops | `npx ts-node scripts/seed-devnet-drops.ts` | Insert 15 demo drops on Devnet |
 
 ---
 
